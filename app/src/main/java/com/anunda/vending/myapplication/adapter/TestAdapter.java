@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -12,17 +14,20 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.anunda.vending.myapplication.R;
 import com.anunda.vending.myapplication.model.ProductModel;
 
+import java.util.ArrayList;
 import java.util.List;
 
 
-public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
+public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> implements Filterable {
 
     private Context context;//for use in future
     private List<ProductModel> productObjects;
+    private List<ProductModel> productObjectsTotal;
 
     public TestAdapter(Context context, List<ProductModel> productObjects) {
         this.context = context;
         this.productObjects = productObjects;
+        this.productObjectsTotal = new ArrayList<>(productObjects);
     }
 
     @NonNull
@@ -89,4 +94,39 @@ public class TestAdapter extends RecyclerView.Adapter<TestAdapter.ViewHolder> {
             this.c_weight = itemView.findViewById(R.id.c_weight);
         }
     }
+
+    @Override
+    public Filter getFilter() {
+        return productFilter;
+    }
+
+    private Filter productFilter = new Filter() {
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            List<ProductModel> filteredList = new ArrayList<>();
+
+            if(constraint == null || constraint.length() == 0){
+                filteredList.addAll(productObjectsTotal);
+            }else {
+                String filterPattern = constraint.toString().toLowerCase().trim();
+               /*getType Search term*/
+                for(ProductModel productItem : productObjectsTotal){
+                    if(productItem.getType().toLowerCase().contains(filterPattern)){
+                        filteredList.add(productItem);
+                    }
+                }
+            }
+            FilterResults results = new FilterResults();
+            results.values = filteredList;
+
+            return results;
+        }
+
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults results) {
+            productObjects.clear();
+            productObjects.addAll((List)results.values);
+            notifyDataSetChanged();
+        }
+    };
 }

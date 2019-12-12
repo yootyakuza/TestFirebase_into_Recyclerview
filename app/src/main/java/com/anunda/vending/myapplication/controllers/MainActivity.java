@@ -6,6 +6,11 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.view.inputmethod.EditorInfo;
+import android.widget.SearchView;
 
 import com.anunda.vending.myapplication.R;
 import com.anunda.vending.myapplication.adapter.TestAdapter;
@@ -59,8 +64,8 @@ public class MainActivity extends AppCompatActivity {
                     productModel.setProductY(ds.child("productY").getValue(String.class));
                     productModel.setRow(ds.child("row").getValue(String.class));
                     productModel.setShelf(ds.child("shelf").getValue(String.class));
-                    productModel.setType(ds.child("shelf").getValue(String.class));
-                    productModel.setWeight(ds.child("weigth").getValue(String.class));
+                    productModel.setType(ds.child("type").getValue(String.class));
+                    productModel.setWeight(ds.child("weight").getValue(String.class));
                     productModels.add(productModel);
                 }
                 LinearLayoutManager manager = new LinearLayoutManager(getApplicationContext());
@@ -75,5 +80,30 @@ public class MainActivity extends AppCompatActivity {
                 Log.w(TAG, "Failed to read value.", error.toException());
             }
         });
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.test_search,menu);
+
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        SearchView searchView = (SearchView) searchItem.getActionView();
+
+        searchView.setImeOptions(EditorInfo.IME_ACTION_DONE);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                adapter.getFilter().filter(newText);
+                return false;
+            }
+        });
+        return true;
     }
 }
